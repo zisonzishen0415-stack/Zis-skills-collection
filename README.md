@@ -1,6 +1,6 @@
-# 🛠️ Claude Code Skills Collection
+# 🛠️ Zi's Skills Collection
 
-> 一套精心挑选的 Claude Code Skills 合集，覆盖工程开发、UI/UX 设计、代码审查、TDD、调试等工作流。共 **57 个 Skills**，来自 3 个社区插件 + 14 个内置技能。
+> 一套精心挑选的 Claude Code Skills 合集，覆盖工程开发、UI/UX 设计、上线安全审计、代码审查、TDD、调试等工作流。共 **60 个 Skills**，来自 6 个社区插件 + 14 个内置技能。
 
 ---
 
@@ -20,6 +20,17 @@ git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git
 # 3. Matt Pocock Skills — 专业工程实践（22 skills）
 git clone https://github.com/mattpocock/skills.git
 # 放入 ~/.claude/plugins/cache/mattpocock/
+
+# 4. cc-launch-check — 42 项上线审计（1 skill）
+npm install -g cc-launch-check
+
+# 5. OWASP Security — OWASP 安全最佳实践（1 skill）
+git clone https://github.com/agamm/claude-code-owasp.git
+# 技能在 .claude/skills/owasp-security/
+
+# 6. Secure Development — 安全开发生命周期（1 skill）
+npx degit IyedGuezmir/secure-development-skill
+# 复制 SKILL.md + references/ 到 ~/.claude/skills/secure-dev/
 ```
 
 ### 手动安装
@@ -28,6 +39,9 @@ git clone https://github.com/mattpocock/skills.git
 ```
 /plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
 /plugin marketplace add mattpocock/skills
+npm install -g cc-launch-check
+npx degit agamm/claude-code-owasp/.claude/skills/owasp-security ~/.claude/skills/owasp-security
+npx degit IyedGuezmir/secure-development-skill ~/.claude/skills/secure-dev
 ```
 
 ---
@@ -39,8 +53,11 @@ git clone https://github.com/mattpocock/skills.git
 | 1 | **superpowers** | 6.1.1 | 14 | 工程工作流 |
 | 2 | **ui-ux-pro-max** | 2.6.2 | 7 | UI/UX 设计 |
 | 3 | **mattpocock-skills** | 1.2.0 | 22 | 专业工程实践 |
-| 4 | **Built-in** | — | 14 | Claude Code 内置 |
-| | **合计** | | **57** | |
+| 4 | **cc-launch-check** | 1.0.0 | 1 | 上线安全审计 |
+| 5 | **claude-code-owasp** | latest | 1 | OWASP 安全标准 |
+| 6 | **secure-dev** | latest | 1 | 安全开发生命周期 |
+| 7 | **Built-in** | — | 14 | Claude Code 内置 |
+| | **合计** | | **60** | |
 
 ---
 
@@ -180,7 +197,101 @@ setup-matt-pocock-skills (首次配置)
 
 ---
 
-## 🏗️ 4. Claude Code 内置技能
+## 🔒 4. cc-launch-check — 42 项上线前审计
+
+> **仓库**: [github.com/arshbot/cc-launch-check](https://github.com/arshbot/cc-launch-check)
+> **安装**: `npm install -g cc-launch-check`
+
+一个专门针对 Landing Page 上线前的综合审计工具，42 项检查覆盖 7 个类别，每项给出 PASS / WARN / FAIL 及文件定位和修复建议。
+
+### 检查类别
+
+| 类别 | 检查项数 | 典型检查 |
+|------|----------|----------|
+| **SEO & Meta** | 7 | title、description、og:image、canonical、结构化数据 |
+| **可访问性 (A11y)** | 7 | alt text、label、对比度、focus、heading 层级 |
+| **性能 (Performance)** | 5 | 图片优化、字体、bundle 大小、LCP |
+| **安全 (Security)** | 5 | 密钥泄露、环境变量、输入消毒、安全头 |
+| **移动端响应式** | 5 | viewport、断点、触摸目标、横屏 |
+| **转化 & UX** | 6 | CTA、社交证明、加载状态、错误页 |
+| **技术健康** | 7 | 控制台错误、死链、favicon、robots.txt |
+
+### 使用方式
+
+```bash
+npx cc-launch-check              # 安装
+/launch-check [url or port]      # 在 Claude Code 中运行
+```
+
+---
+
+## 🛡️ 5. OWASP Security — OWASP 安全最佳实践
+
+> **仓库**: [github.com/agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp)
+> **安装**: `npx degit agamm/claude-code-owasp/.claude/skills/owasp-security ~/.claude/skills/owasp-security`
+
+覆盖四大安全标准的安全审计 skill，在你代码审查、实现认证、处理用户输入或设计 API 时自动激活。
+
+### 覆盖标准
+
+| 标准 | 版本 | 内容 |
+|------|------|------|
+| **OWASP Top 10** | 2025 | Web 应用漏洞（注入、认证失效、SSRF…） |
+| **ASVS** | 5.0.0 | 安全验证要求（V1-V14） |
+| **LLM Top 10** | 2025 | LLM01-LLM10，含提示注入、数据泄露 |
+| **Agentic AI** | 2026 | ASI01-ASI10，AI Agent 特有风险 |
+
+### 语言覆盖
+
+20+ 编程语言的安全特性：`JavaScript/TypeScript` `Python` `Java` `C#` `Go` `Rust` `Swift` `Kotlin` `PHP` `Ruby` `C/C++` `Dart` `Perl` `Shell` 等
+
+### 使用方式
+
+```
+/owasp-security   — 自动在审查代码、实现 auth 时触发
+```
+
+---
+
+## 🔐 6. Secure Development — 安全开发生命周期
+
+> **仓库**: [github.com/IyedGuezmir/secure-development-skill](https://github.com/IyedGuezmir/secure-development-skill)
+> **安装**: `npx degit IyedGuezmir/secure-development-skill`
+
+覆盖从计划到事件响应的 6 阶段安全开发流程。
+
+### 六阶段流程
+
+```
+计划 & 需求 → 设计 & 架构 → 安全开发 → 安全测试 → CI/CD & 部署 → 监控 & 响应
+```
+
+| 阶段 | 关键实践 |
+|------|----------|
+| **计划 & 需求** | 威胁建模（STRIDE/PASTA）、安全验收标准、合规要求 |
+| **设计 & 架构** | 最小权限、纵深防御、零信任、加密模式 |
+| **安全开发** | 输入验证、密钥管理、供应链安全 |
+| **安全测试** | SAST、DAST、SCA、IAST |
+| **CI/CD & 部署** | 流水线安全门禁、IaC 扫描、容器加固 |
+| **监控 & 响应** | SIEM、IDS/IPS、审计日志、应急计划 |
+
+### 参考深度指南
+
+| 主题 | 内容 |
+|------|------|
+| API 安全 | REST API 安全模式、Swagger/OpenAPI |
+| LLM 安全 | OWASP LLM Top 10、提示注入防御 |
+| 数据分级 | 4 级分类矩阵（公开/内部/机密/绝密） |
+| IAM & API Gateway | 认证模式、API 网关架构 |
+| 合规框架 | GDPR、ISO 27001、PCI-DSS、SOC 2、ASVS |
+
+### 十大快速收益
+
+1. 全接入点启用 MFA · 2. Pre-commit 密钥检测 · 3. 依赖扫描 · 4. TLS 1.3 · 5. 集中 IAM · 6. API 网关限流 + JWT · 7. CI/CD 集成 SAST · 8. 强制安全代码审查 · 9. 集中日志 + 异常告警 · 10. 团队 OWASP Top 10 培训
+
+---
+
+## 🏗️ 7. Claude Code 内置技能
 
 Claude Code 自带的 14 个技能，无需安装。
 
@@ -220,6 +331,11 @@ Claude Code 自带的 14 个技能，无需安装。
 /code-review (built-in) 或 /code-review (Matt Pocock) 或 /requesting-code-review (Superpowers)
 ```
 
+### 上线前安全审计
+```
+/launch-check → /owasp-security → /secure-dev
+```
+
 ### UI 设计
 ```
 /ui-ux-pro-max → /design → /ui-styling
@@ -241,6 +357,9 @@ Claude Code 自带的 14 个技能，无需安装。
 | UI-UX-Pro-Max 官网 | [uupm.cc](https://uupm.cc) |
 | Matt Pocock Skills 仓库 | [github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
 | Matt Pocock 官网 | [aihero.dev](https://www.aihero.dev) |
+| cc-launch-check | [github.com/arshbot/cc-launch-check](https://github.com/arshbot/cc-launch-check) |
+| OWASP Security Skill | [github.com/agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) |
+| Secure Development Skill | [github.com/IyedGuezmir/secure-development-skill](https://github.com/IyedGuezmir/secure-development-skill) |
 | Claude Code 官方文档 | [docs.anthropic.com](https://docs.anthropic.com/en/docs/claude-code) |
 | Claude Plugins 官方市场 | [github.com/anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) |
 
