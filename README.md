@@ -1,380 +1,189 @@
 # 🛠️ Zi's Skills Collection
 
-> 一套精心挑选的 Claude Code Skills 合集，覆盖工程开发、UI/UX 设计、上线安全审计、代码审查、TDD、调试等工作流。共 **60 个 Skills**，来自 6 个社区插件 + 14 个内置技能。
+> 当前 Claude Code 环境的 skills / plugins 清单。
+> 这不是一份「收集来但没在用」的列表：按本机 `~/.claude/skills`、`enabledPlugins` 和插件 cache 的实际状态整理。
+> 更新：2026-10-29
+
+## 一眼看完
+
+| 类型 | 数量 | 状态 |
+|---|---:|---|
+| 自建 / 用户 skills | 4 | 启用 |
+| 启用中的插件 | 3（3 skills + 5 commands） | 启用 |
+| Claude Code 内置 skills | 13 | 随版本 |
+| 已安装未启用的插件 | 3（16 skills） | 未启用 |
+| 只剩元数据的旧插件 | 5（32 skills） | 不可用 |
+
+当前可用：4 + 3 + 13 = **20 个 skills**（插件命令另算 5 个）。
+
+旧版 README 的 60 个里，有 32 个来自已经不在这台机器上的社区插件；这次按实际状态重写。已安装但没启用的插件、只剩元数据的旧插件，都单独列出来，不再混进「当前可用」。
 
 ---
 
-## 📦 快速安装
+## 1. 自建 / 用户 skills（4）
 
-### 一键安装所有插件
+位置：`~/.claude/skills/`。代码在各自项目或本机，不在本仓库重复分发。
+
+| Skill | 做什么 | 触发场景 |
+|---|---|---|
+| **et-prj-corpus** | 无头、只读地把一批 ET `.prj` 板片导出成 JSONL，带覆盖率统计；提取规格区 / 尺寸表，判定「完整多尺码表 vs 单码摘要」 | 批量解析 ET 板片资产；问 `.prj` 里到底有没有完整多尺码表 |
+| **et-prj-headless** | 无头、只读解析 ET `.prj`，提取 M 码衣长、后中长、裤长等成品尺寸线索 | 要求分析 ET 项目，但禁止打开软件或操作桌面 |
+| **jch-recolor** | 金昌 EX9000 JCH 花型换色：参考图反解每层颜色，写回 JCH，输出可交付印染的成品包 | 「这个花型换成这个配色」「JCH 换色」「分色改色」 |
+| **reverse-engineer-anything** | REA 的 Claude Code skill：原生 / 托管 / Electron / 固件 / 浏览器目标的逆向调查，170 个工具 | shipped binary / 反编译 / 版本对比 / 运行时证据 |
+
+---
+
+## 2. 启用中的插件（3）
+
+`~/.claude/settings.json` 的 `enabledPlugins` 里为 `true`。每个插件 1 个主 skill；company-background-check 和 customer-acquisition 另带命令。
+
+### 2.1 company-background-check（私有仓库）
+
+> 企业背调 / 新客户调查。**仓库私有，仅协作者可安装。**
+
+- **Skill**：`company-background-check`
+- **命令**：`/company-background-check:company-background-check`、`:setup`、`:pdf`、`:help`
+- **做什么**：从名片 / 公司名 / 域名出发，先定主体，再查官方登记源（UK Companies House、GLEIF、法国 recherche-entreprises）、自主网页检索、RDAP 域名核验、自审；输出带出处和置信度的公开信息报告。只呈现事实，不做评分。
 
 ```bash
-# 1. Superpowers — 工程开发工作流（14 skills）
-/plugin marketplace add anthropics/claude-plugins-official
-/plugin install superpowers@claude-plugins-official
-
-# 2. UI-UX-Pro-Max — 设计智能引擎（7 skills）
-git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git
-# 放入 ~/.claude/plugins/cache/ui-ux-pro-max-skill/
-
-# 3. Matt Pocock Skills — 专业工程实践（22 skills）
-git clone https://github.com/mattpocock/skills.git
-# 放入 ~/.claude/plugins/cache/mattpocock/
-
-# 4. cc-launch-check — 42 项上线审计（1 skill）
-npm install -g cc-launch-check
-
-# 5. OWASP Security — OWASP 安全最佳实践（1 skill）
-git clone https://github.com/agamm/claude-code-owasp.git
-# 技能在 .claude/skills/owasp-security/
-
-# 6. Secure Development — 安全开发生命周期（1 skill）
-npx degit IyedGuezmir/secure-development-skill
-# 复制 SKILL.md + references/ 到 ~/.claude/skills/secure-dev/
+# 仅限有仓库权限的协作者
+claude plugin marketplace add zisonzishen0415-stack/company-background-check
+claude plugin install company-background-check@company-background-check
 ```
 
-### 手动安装
+### 2.2 customer-acquisition（私有仓库）
 
-在 Claude Code 中输入：
-```
-/plugin marketplace add nextlevelbuilder/ui-ux-pro-max-skill
-/plugin marketplace add mattpocock/skills
-npm install -g cc-launch-check
-npx degit agamm/claude-code-owasp/.claude/skills/owasp-security ~/.claude/skills/owasp-security
-npx degit IyedGuezmir/secure-development-skill ~/.claude/skills/secure-dev
-```
+> 获客 / 相似客户发现。**仓库私有，仅协作者可安装。**
 
----
-
-## 📊 总览
-
-| # | 插件/来源 | 版本 | Skills 数 | 类型 |
-|---|----------|------|-----------|------|
-| 1 | **superpowers** | 6.1.1 | 14 | 工程工作流 |
-| 2 | **ui-ux-pro-max** | 2.6.2 | 7 | UI/UX 设计 |
-| 3 | **mattpocock-skills** | 1.2.0 | 22 | 专业工程实践 |
-| 4 | **cc-launch-check** | 1.0.0 | 1 | 上线安全审计 |
-| 5 | **claude-code-owasp** | latest | 1 | OWASP 安全标准 |
-| 6 | **secure-dev** | latest | 1 | 安全开发生命周期 |
-| 7 | **Built-in** | — | 14 | Claude Code 内置 |
-| | **合计** | | **60** | |
-
----
-
-## 🔗 1. Superpowers — 工程开发工作流
-
-> **仓库**: [github.com/obra/superpowers](https://github.com/obra/superpowers)
-> **作者**: Jesse Vincent
-> **安装**: `/plugin install superpowers@claude-plugins-official`
-
-一个覆盖完整开发管线的技能体系：从头脑风暴 → 计划 → 编写 → 测试 → 审查 → 完成。
-
-### 完整 Workflow
-
-```
-using-superpowers (入口)
-  → brainstorming (设计)
-    → writing-plans (计划)
-      → using-git-worktrees (隔离工作区)
-        → subagent-driven-development / executing-plans (执行)
-          → test-driven-development (TDD)
-          → systematic-debugging (调试)
-          → requesting-code-review / receiving-code-review (审查)
-          → dispatching-parallel-agents (并行任务)
-          → verification-before-completion (验证)
-            → finishing-a-development-branch (合并/PR)
-```
-
-### 技能清单
-
-| Skill | 描述 | 使用方式 |
-|-------|------|----------|
-| **brainstorming** | 在编写代码前，将想法转化为完整设计和规格 | `/brainstorming` |
-| **dispatching-parallel-agents** | 为独立任务分派子代理并行工作 | `/dispatching-parallel-agents` |
-| **executing-plans** | 在单独会话中执行已有的实现计划 | `/executing-plans` |
-| **finishing-a-development-branch** | 结构化处理分支合并：本地合并/PR/保持/丢弃 | `/finishing-a-development-branch` |
-| **receiving-code-review** | 处理代码审查反馈，强调技术严谨性 | `/receiving-code-review` |
-| **requesting-code-review** | 分派代码审查子代理在问题扩散前捕获 | `/requesting-code-review` |
-| **subagent-driven-development** | 在当前会话中为每个任务分派实现子代理 | `/subagent-driven-development` |
-| **systematic-debugging** | 四阶段查错法：根因调查→模式分析→假设检验→实施 | `/systematic-debugging` |
-| **test-driven-development** | 红-绿-重构循环：先写失败测试再看它失败再写代码 | `/test-driven-development` |
-| **using-git-worktrees** | 用 git worktree 隔离功能开发工作区 | `/using-git-worktrees` |
-| **using-superpowers** | 入口技能，确保所有技能在适当时被正确调用 | `/using-superpowers` |
-| **verification-before-completion** | 在声称完成前运行验证命令 — 证据先于断言 | `/verification-before-completion` |
-| **writing-plans** | 编写包含精确文件路径和代码的综合实现计划 | `/writing-plans` |
-| **writing-skills** | 用 TDD 方法论创建和验证新技能 | `/writing-skills` |
-
----
-
-## 🎨 2. UI-UX-Pro-Max — 设计智能引擎
-
-> **仓库**: [github.com/nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
-> **版本**: 2.6.2
-> **安装**: `git clone` 到 `~/.claude/plugins/cache/ui-ux-pro-max-skill/`
-
-一个可搜索的本地设计知识库，含 **84 种 UI 风格、161 种配色、73 组字体搭配、99 条 UX 指南、25 种图表类型**，覆盖 17 个技术栈。
-
-### 依赖关系
-
-```
-ui-ux-pro-max (设计智能引擎 — 搜索、规则、推荐)
-  ├── design (统一入口 — 路由至所有子技能)
-  │   ├── brand (品牌声音、身份、资源)
-  │   ├── design-system (Token 架构 + 幻灯片引擎)
-  │   ├── ui-styling (shadcn/ui + Tailwind 实现)
-  │   └── banner-design (社交媒体/广告横幅 + AI 视觉)
-  └── slides (演示文稿创建)
-```
-
-### 技能清单
-
-| Skill | 描述 | 使用方式 |
-|-------|------|----------|
-| **ui-ux-pro-max** | 核心设计智能引擎，基于优先级的多类规则系统 | `/ui-ux-pro-max` + `python scripts/search.py "<query>" --design-system` |
-| **design** | 统一设计入口：品牌、Token、UI、Logo、幻灯片、横幅、图标 | `/design [design-type] [context]` |
-| **brand** | 品牌声音、视觉识别、信息框架、资源管理 | `/brand [update\|review\|create] [args]` |
-| **design-system** | 三层 Token 架构：primitive → semantic → component | `/design-system [component or token]` |
-| **ui-styling** | shadcn/ui + Tailwind CSS 组件化 UI 构建 | `/ui-styling [component or layout]` |
-| **banner-design** | 多平台横幅设计，22 种风格，AI 生成视觉元素 | `/banner-design [platform] [style] [dimensions]` |
-| **slides** | HTML 演示文稿 + Chart.js + 设计 Token | `/slides [topic] [slide-count]` |
-
-### 技术栈支持
-
-React · Next.js · Vue · Nuxt.js · Nuxt UI · Svelte · Astro · SwiftUI · React Native · Flutter · Tailwind · shadcn/ui · Jetpack Compose · Angular · Laravel · JavaFX · Three.js
-
----
-
-## ⚙️ 3. Matt Pocock Skills — 专业工程实践
-
-> **仓库**: [github.com/mattpocock/skills](https://github.com/mattpocock/skills)
-> **作者**: [Matt Pocock](https://www.aihero.dev)
-> **安装**: `git clone` 到 `~/.claude/plugins/cache/mattpocock/`
-
-一套由 Matt Pocock 打造的"真正工程"技能集合，强调烧烤式访谈（grilling）、规格驱动、TDD、领域建模和代码审查。
-
-### 主流程
-
-```
-setup-matt-pocock-skills (首次配置)
-  → grill-with-docs (访谈 + 文档)
-    → to-spec (生成规格 PRD)
-      → to-tickets (分解为工单)
-        → implement (实现)
-          → code-review (审查)
-```
-
-### 工程技能 (Engineering)
-
-| Skill | 描述 | 触发方式 |
-|-------|------|----------|
-| **ask-matt** | 路由器 — 根据当前情况推荐合适的技能 | 手动 `/ask-matt` |
-| **code-review** | 双轴审查：编码标准 + 规格合规 | 自动触发 |
-| **codebase-design** | 深层模块设计词汇：接口、接缝、适配器 | 自动触发 |
-| **diagnosing-bugs** | 多阶段诊断循环：复现→假设→仪器化→修复 | 自动触发 |
-| **domain-modeling** | 构建和完善项目的领域模型 + ADR | 自动触发 |
-| **grill-with-docs** | 持续访谈流程，同时创建 ADR 和词汇表 | 手动 `/grill-with-docs` |
-| **implement** | 按规格实现，内部驱动 TDD + 代码审查 | 手动 `/implement` |
-| **improve-codebase-architecture** | 扫描热点，发现深化机会，生成 HTML 报告 | 手动 `/improve-codebase-architecture` |
-| **prototype** | 构建抛弃式原型：逻辑型（终端）/ UI 型（多变体） | 自动触发 |
-| **research** | 委托后台代理调查文档/源码/规范，返回引用文件 | 自动触发 |
-| **resolving-merge-conflicts** | 按冲突块来源、合并目标解决 git 合并冲突 | 自动触发 |
-| **setup-matt-pocock-skills** | 首次使用前配置仓库：跟踪器、标签、文档布局 | 手动 `/setup-matt-pocock-skills` |
-| **tdd** | TDD 参考：好测试、接缝、反模式、红-绿循环 | 自动触发 |
-| **to-spec** | 将访谈上下文转化为规格说明（PRD） | 手动 `/to-spec` |
-| **to-tickets** | 将规格分解为垂直切片工单并发布到跟踪器 | 手动 `/to-tickets` |
-| **triage** | 五角色状态机对 issue 进行分类：needs-triage→ready/wontfix | 手动 `/triage` |
-| **wayfinder** | 为超大工作块规划路线 → 决策工单 → 移交给 `/to-spec` | 手动 `/wayfinder` |
-
-### 生产力技能 (Productivity)
-
-| Skill | 描述 | 触发方式 |
-|-------|------|----------|
-| **grill-me** | 无状态访谈 — 无代码库，不保存本地内容 | 手动 `/grill-me` |
-| **grilling** | 持续访谈原语 — `/grill-with-docs` 和 `/grill-me` 的基础 | 自动触发 |
-| **handoff** | 将当前对话压缩为交接文档（Markdown） | 手动 `/handoff [focus]` |
-| **teach** | 多会话渐进式教学，构建课程和参考资料 | 手动 `/teach [topic]` |
-| **writing-great-skills** | 编写技能的参考指南：词汇表、信息层次、反模式 | 手动 `/writing-great-skills` |
-
----
-
-## 🔒 4. cc-launch-check — 42 项上线前审计
-
-> **仓库**: [github.com/arshbot/cc-launch-check](https://github.com/arshbot/cc-launch-check)
-> **安装**: `npm install -g cc-launch-check`
-
-一个专门针对 Landing Page 上线前的综合审计工具，42 项检查覆盖 7 个类别，每项给出 PASS / WARN / FAIL 及文件定位和修复建议。
-
-### 检查类别
-
-| 类别 | 检查项数 | 典型检查 |
-|------|----------|----------|
-| **SEO & Meta** | 7 | title、description、og:image、canonical、结构化数据 |
-| **可访问性 (A11y)** | 7 | alt text、label、对比度、focus、heading 层级 |
-| **性能 (Performance)** | 5 | 图片优化、字体、bundle 大小、LCP |
-| **安全 (Security)** | 5 | 密钥泄露、环境变量、输入消毒、安全头 |
-| **移动端响应式** | 5 | viewport、断点、触摸目标、横屏 |
-| **转化 & UX** | 6 | CTA、社交证明、加载状态、错误页 |
-| **技术健康** | 7 | 控制台错误、死链、favicon、robots.txt |
-
-### 使用方式
+- **Skill**：`customer-acquisition`
+- **命令**：`/customer-acquisition:customer-acquisition`、`:setup`、`:help`
+- **做什么**：把老客户 / 可靠客户名单量化成画像（按 Wilson 95% 下界分铁律 / 多数 / 分化 / 证据不足），再从公开网络、展会名录、B2B 目录、海关提单、社媒找 lookalike 潜客；判重、按相似度 × 证据覆盖排序。
 
 ```bash
-npx cc-launch-check              # 安装
-/launch-check [url or port]      # 在 Claude Code 中运行
+# 仅限有仓库权限的协作者
+claude plugin marketplace add zisonzishen0415-stack/customer-acquisition
+claude plugin install customer-acquisition@customer-acquisition
+```
+
+### 2.3 weekly-report（公开）
+
+> 从代码证据重建周报。
+
+- **Skill**：`weekly-report`
+- **做什么**：从 git history、未提交改动、代码原子和生成物里取证，按功能而不是按 commit 聚类；产出可归档周报、展示版 HTML/PDF、口头汇报版，以及按人拆的清单版。
+
+```bash
+claude plugin marketplace add zisonzishen0415-stack/weekly-report
+claude plugin install weekly-report@weekly-report
 ```
 
 ---
 
-## 🛡️ 5. OWASP Security — OWASP 安全最佳实践
+## 3. Claude Code 内置 skills（13）
 
-> **仓库**: [github.com/agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp)
-> **安装**: `npx degit agamm/claude-code-owasp/.claude/skills/owasp-security ~/.claude/skills/owasp-security`
+无需安装，随 Claude Code 版本变化。
 
-覆盖四大安全标准的安全审计 skill，在你代码审查、实现认证、处理用户输入或设计 API 时自动激活。
-
-### 覆盖标准
-
-| 标准 | 版本 | 内容 |
-|------|------|------|
-| **OWASP Top 10** | 2025 | Web 应用漏洞（注入、认证失效、SSRF…） |
-| **ASVS** | 5.0.0 | 安全验证要求（V1-V14） |
-| **LLM Top 10** | 2025 | LLM01-LLM10，含提示注入、数据泄露 |
-| **Agentic AI** | 2026 | ASI01-ASI10，AI Agent 特有风险 |
-
-### 语言覆盖
-
-20+ 编程语言的安全特性：`JavaScript/TypeScript` `Python` `Java` `C#` `Go` `Rust` `Swift` `Kotlin` `PHP` `Ruby` `C/C++` `Dart` `Perl` `Shell` 等
-
-### 使用方式
-
-```
-/owasp-security   — 自动在审查代码、实现 auth 时触发
-```
+| Skill | 做什么 |
+|---|---|
+| **dataviz** | 图表 / 图形 / 仪表盘 / 数据可视化 |
+| **update-config** | 改 `settings.json`：hooks、权限、环境变量 |
+| **keybindings-help** | 自定义键盘快捷键 |
+| **code-review** | 审查当前 diff 或 PR 的正确性 / 质量 |
+| **simplify** | 审查并应用复用、简化、效率清理 |
+| **fewer-permission-prompts** | 扫描记录，把常用只读工具加进允许列表 |
+| **loop** | 定时循环运行 prompt 或命令 |
+| **claude-api** | Claude API / Anthropic SDK 参考 |
+| **workflow-authoring** | 编写 Workflow 脚本、阶段与并行 agent |
+| **run** | 启动并驱动项目 app，验证改动 |
+| **init** | 初始化 `CLAUDE.md` 代码库文档 |
+| **security-review** | 对当前分支变更做安全审查 |
+| **plugin-authoring** | 写 Claude Code 插件：面板、状态栏、hook 等 |
 
 ---
 
-## 🔐 6. Secure Development — 安全开发生命周期
+## 4. 已安装但未启用（3 个插件 / 16 skills）
 
-> **仓库**: [github.com/IyedGuezmir/secure-development-skill](https://github.com/IyedGuezmir/secure-development-skill)
-> **安装**: `npx degit IyedGuezmir/secure-development-skill`
+`installed_plugins.json` 有记录、cache 目录存在，但 `enabledPlugins` 里没有；当前会话不会出现在 Skill 列表。
 
-覆盖从计划到事件响应的 6 阶段安全开发流程。
+| 插件 | 版本 | Skills | 说明 |
+|---|---|---:|---|
+| **superpowers** | 7.0.0 | 15 | 工程工作流：brainstorming → plan → worktree → TDD → review → finish |
+| **frontend-design** | 1.1.1 | 1 | UI/UX 实现的前端设计 skill |
+| **security-guidance** | 2.0.17 | 0 | 安全 hook / diff review，不是 skill |
 
-### 六阶段流程
-
-```
-计划 & 需求 → 设计 & 架构 → 安全开发 → 安全测试 → CI/CD & 部署 → 监控 & 响应
-```
-
-| 阶段 | 关键实践 |
-|------|----------|
-| **计划 & 需求** | 威胁建模（STRIDE/PASTA）、安全验收标准、合规要求 |
-| **设计 & 架构** | 最小权限、纵深防御、零信任、加密模式 |
-| **安全开发** | 输入验证、密钥管理、供应链安全 |
-| **安全测试** | SAST、DAST、SCA、IAST |
-| **CI/CD & 部署** | 流水线安全门禁、IaC 扫描、容器加固 |
-| **监控 & 响应** | SIEM、IDS/IPS、审计日志、应急计划 |
-
-### 参考深度指南
-
-| 主题 | 内容 |
-|------|------|
-| API 安全 | REST API 安全模式、Swagger/OpenAPI |
-| LLM 安全 | OWASP LLM Top 10、提示注入防御 |
-| 数据分级 | 4 级分类矩阵（公开/内部/机密/绝密） |
-| IAM & API Gateway | 认证模式、API 网关架构 |
-| 合规框架 | GDPR、ISO 27001、PCI-DSS、SOC 2、ASVS |
-
-### 十大快速收益
-
-1. 全接入点启用 MFA · 2. Pre-commit 密钥检测 · 3. 依赖扫描 · 4. TLS 1.3 · 5. 集中 IAM · 6. API 网关限流 + JWT · 7. CI/CD 集成 SAST · 8. 强制安全代码审查 · 9. 集中日志 + 异常告警 · 10. 团队 OWASP Top 10 培训
+启用方式：`/plugin` 里打开，或在 `settings.json` 的 `enabledPlugins` 里加 `"插件名@marketplace": true`。
 
 ---
 
-## 🏗️ 7. Claude Code 内置技能
+## 5. 只剩元数据的旧插件（5 个 / 32 skills）
 
-Claude Code 自带的 14 个技能，无需安装。
+`installed_plugins.json` 还留着记录，但 cache 安装目录已经不存在，重装前不可用。
 
-| Skill | 描述 | 使用方式 |
-|-------|------|----------|
-| **deep-research** | 深度研究：多源搜索 → 获取 → 验证 → 合成引用报告 | `/deep-research [topic]` |
-| **dataviz** | 创建图表/图形/仪表盘/数据可视化 | `/dataviz`（触发词：chart, graph, plot, dashboard） |
-| **update-config** | 配置 settings.json：hooks, 权限, 环境变量 | `/update-config` |
-| **keybindings-help** | 自定义键盘快捷键和组合键 | `/keybindings-help` |
-| **verify** | 端到端验证代码变更是否按预期工作 | `/verify` |
-| **code-review** | 审查当前 diff 的正确性和质量 | `/code-review`（可选 `--fix`） |
-| **simplify** | 审查代码的重用/简化/效率改进并应用 | `/simplify` |
-| **fewer-permission-prompts** | 扫描记录，添加常用工具到允许列表减少权限提示 | `/fewer-permission-prompts` |
-| **loop** | 定时循环运行 prompt 或命令 | `/loop [interval] [command]` |
-| **claude-api** | Claude API / Anthropic SDK 参考 | `/claude-api` |
-| **run** | 启动并驱动项目应用验证变更 | `/run` |
-| **init** | 初始化 CLAUDE.md 代码库文档 | `/init` |
-| **review** | 审查 GitHub Pull Request | `/review` |
-| **security-review** | 完成当前分支变更的安全审查 | `/security-review` |
+| 插件 | 版本 | Skills |
+|---|---|---:|
+| **ui-ux-pro-max** | 2.6.2 | 7 |
+| **mattpocock-skills** | 1.2.0 | 22 |
+| **cc-launch-check** | 1.0.0 | 1 |
+| **owasp-security** | unknown | 1 |
+| **secure-dev** | unknown | 1 |
+
+旧版 README 里这 32 个的详细条目已移除；需要时按原仓库重装，再加回「当前可用」。
 
 ---
 
-## 🚀 使用场景
+## 6. 常用入口
 
-### 新功能开发
-```
-/brainstorming → /writing-plans → /implement (Matt Pocock) 或 /subagent-driven-development (Superpowers)
-```
-
-### Bug 修复
-```
-/systematic-debugging 或 /diagnosing-bugs
-```
-
-### 代码审查
-```
-/code-review (built-in) 或 /code-review (Matt Pocock) 或 /requesting-code-review (Superpowers)
-```
-
-### 上线前安全审计
-```
-/launch-check → /owasp-security → /secure-dev
-```
-
-### UI 设计
-```
-/ui-ux-pro-max → /design → /ui-styling
-```
-
-### 项目启动
-```
-/setup-matt-pocock-skills → /grill-with-docs → /to-spec → /to-tickets
-```
+| 想做什么 | 用哪个 |
+|---|---|
+| 查一家公司 / 新客户 | `/company-background-check:company-background-check` |
+| 从老客户名单找潜客 | `/customer-acquisition:customer-acquisition` |
+| 整理这一周的成果 | `/weekly-report:weekly-report` |
+| 批量解析 ET `.prj` | `et-prj-corpus` |
+| 不打开 ET，查 M 码成品尺寸 | `et-prj-headless` |
+| JCH 花型换色 | `jch-recolor` |
+| 逆向 binary / Electron / 固件 | `reverse-engineer-anything` |
+| 图表 / 可视化 | `dataviz` |
+| 审查 diff / PR | `code-review` 或 `security-review` |
 
 ---
 
-## 📚 相关资源
+## 7. 维护口径
+
+```bash
+# 用户 skills
+ls ~/.claude/skills
+
+# 已启用插件
+jq '.enabledPlugins' ~/.claude/settings.json
+
+# 已安装插件（含未启用 / 只剩元数据）
+jq '.plugins | keys' ~/.claude/plugins/installed_plugins.json
+
+# 数一下每个插件里有多少 SKILL.md
+find ~/.claude/plugins/cache -name SKILL.md | wc -l
+```
+
+口径：
+
+- **启用**：`~/.claude/skills/<name>/SKILL.md` 存在，或 `enabledPlugins` 为 `true`。
+- **已安装未启用**：`installed_plugins.json` 有记录、cache 目录存在，但 `enabledPlugins` 没有。
+- **只剩元数据**：`installed_plugins.json` 有记录、cache 目录不存在。
+- **内置**：Claude Code 自带，随版本变化；不在 `~/.claude/skills` 里。
+
+本仓库是索引，不是 skill 源码分发。第三方 skill / 插件的版权和许可见各自仓库；自建 skill 的代码留在本机或各自项目里。
+
+---
+
+## 8. 相关链接
 
 | 资源 | URL |
-|------|-----|
-| Superpowers 仓库 | [github.com/obra/superpowers](https://github.com/obra/superpowers) |
-| UI-UX-Pro-Max 仓库 | [github.com/nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) |
-| UI-UX-Pro-Max 官网 | [uupm.cc](https://uupm.cc) |
-| Matt Pocock Skills 仓库 | [github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| Matt Pocock 官网 | [aihero.dev](https://www.aihero.dev) |
-| cc-launch-check | [github.com/arshbot/cc-launch-check](https://github.com/arshbot/cc-launch-check) |
-| OWASP Security Skill | [github.com/agamm/claude-code-owasp](https://github.com/agamm/claude-code-owasp) |
-| Secure Development Skill | [github.com/IyedGuezmir/secure-development-skill](https://github.com/IyedGuezmir/secure-development-skill) |
-| Claude Code 官方文档 | [docs.anthropic.com](https://docs.anthropic.com/en/docs/claude-code) |
-| Claude Plugins 官方市场 | [github.com/anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) |
+|---|---|
+| Claude Code 文档 | <https://docs.anthropic.com/en/docs/claude-code> |
+| Claude 官方插件市场 | <https://github.com/anthropics/claude-plugins-official> |
+| Superpowers | <https://github.com/obra/superpowers> |
+| weekly-report | <https://github.com/zisonzishen0415-stack/weekly-report> |
+| 个人网站 | <https://zisonzishen0415-stack.github.io/> |
 
 ---
 
-## 🤝 贡献
-
-欢迎提交 PR 添加更多优质的 Claude Code Skills！
-
-每个 Skill 条目应包含：
-- 名称和简短描述
-- 来源仓库 URL
-- 安装方式
-- 使用示例
-
----
-
-> 维护者: [@zisonzishen0415](https://github.com/zisonzishen0415-stack)
+> 维护者：[@zisonzishen0415-stack](https://github.com/zisonzishen0415-stack)
